@@ -1161,7 +1161,7 @@
         <div>
           <div class="eyebrow">Explore first</div>
           <h3>Spin through the library</h3>
-          <p class="wheel-sub">All 93 cards, one wheel. Drag it, click the arrows, or hit spin to land on something new &mdash; turn your sound on.</p>
+          <p class="wheel-sub">All <span id="wheel-card-count">122</span> cards, one wheel. Drag it, click the arrows, or hit spin to land on something new &mdash; turn your sound on.</p>
         </div>
         <div class="wheel-controls">
           <button class="btn btn-sm" id="wheel-sound-toggle" aria-pressed="true"><span class="ic">🔊</span> Sound on</button>
@@ -1263,7 +1263,8 @@
       <p><b>Rotating quarterly categories.</b> Chase Freedom Flex and Discover it pay an elevated rate on categories that change each quarter (capped, activation required). Their bonus counts in your earnings and totals whenever the card is activated in <b>My Wallet</b>, and <b>Your ideal lineup</b> always includes them (a 5% category beats almost any other rate) unless you choose &ldquo;Keep it simple.&rdquo; Because the categories change each quarter, your best setup can change too; the table at the bottom of My Wallet shows what each category reverts to. The shared cap is split in a fixed priority order, niche merchant or charity categories aren&rsquo;t modeled, and unannounced quarters use the base rate.</p>
       <p><b>Bilt 2.0 rent tiers.</b> Blue, Obsidian and Palladium charge no fee on rent, but the rate slides from 0.5x to 1.25x with your other spend on the card that cycle (0.5x at 25% of rent, 0.75x at 50%, 1x at 75%, 1.25x at 100%). In your wallet it&rsquo;s computed from your assigned categories; elsewhere it assumes the best-case 1.25x.</p>
     </details>
-    <p>No accounts or live data &mdash; every number comes from what you type, and nothing leaves this page.</p>
+    <p id="sheet-status">Loading card data&hellip;</p>
+    <p>No accounts &mdash; your spending and wallet stay in this page and are never sent anywhere. Card rates and rotating categories load from a published Google Sheet.</p>
   </footer>
 </div>
 
@@ -8819,6 +8820,188 @@ document.getElementById('lib-nofee').addEventListener('change', renderLibrary);
 /* ============================================================
    INIT
    ============================================================ */
+/* ============================================================
+   LIVE CARD DATA FROM YOUR GOOGLE SHEET
+   Reads the Cards and Rotating tabs of the "Multiplier Card Data" Google Sheet
+   (shared as "anyone with the link can view"). Set a link to '' to use the card
+   data built into this page instead.
+   ============================================================ */
+const SHEET_CARDS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Ke9dA48tiT_oRIqe0gysQxczRo50QrqEvNfZ-7W5Im0/gviz/tq?tqx=out:csv&headers=1&sheet=Cards';
+const SHEET_ROTATING_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Ke9dA48tiT_oRIqe0gysQxczRo50QrqEvNfZ-7W5Im0/gviz/tq?tqx=out:csv&headers=1&sheet=Rotating';
+
+const SHEET_STATUS = { source: 'built-in', warnings: [] };
+
+function parseCSV(text){
+  const rows = []; let row = [], field = '', q = false;
+  for (let i = 0; i < text.length; i++){
+    const ch = text[i];
+    if (q){
+      if (ch === '"'){ if (text[i + 1] === '"'){ field += '"'; i++; } else q = false; }
+      else field += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ','){ row.push(field); field = ''; }
+    else if (ch === '\n' || ch === '\r'){
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(field); rows.push(row); row = []; field = '';
+    } else field += ch;
+  }
+  if (field !== '' || row.length){ row.push(field); rows.push(row); }
+  if (!rows.length) return [];
+  const headers = rows[0].map(h => h.trim().toLowerCase());
+  return rows.slice(1)
+    .filter(r => r.some(v => v.trim() !== ''))
+    .map(r => Object.fromEntries(headers.map((h, i) => [h, (r[i] || '').trim()])));
+}
+/* "$1,500" -> 1500, "3x" -> 3, "" -> null */
+function sheetNum(v){
+  if (v == null) return null;
+  const s = String(v).replace(/[$,%x×\s]/gi, '');
+  if (s === '') return null;
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : null;
+}
+/* Category names accepted in the sheet: the column headers, the internal keys, and a few short forms. */
+const SHEET_CATEGORY_ALIASES = (() => {
+  const m = {};
+  CATEGORY_META.forEach(c => { m[c.label.toLowerCase()] = c.key; m[c.key.toLowerCase()] = c.key; });
+  Object.assign(m, {
+    'dining': 'dining', 'restaurants': 'dining', 'restaurant': 'dining',
+    'grocery': 'groceries', 'grocery stores': 'groceries', 'supermarkets': 'groceries',
+    'gas': 'gas', 'gas stations': 'gas', 'ev charging': 'gas',
+    'transit': 'transit', 'rideshare': 'transit', 'public transit': 'transit',
+    'online': 'onlineShopping', 'amazon': 'onlineShopping', 'online shopping': 'onlineShopping',
+    'drugstores': 'drugstore', 'pharmacy': 'drugstore',
+    'home improvement stores': 'homeImprovement',
+    'other': 'other', 'everything else': 'other',
+  });
+  return m;
+})();
+function sheetCategoryList(text, where){
+  if (!text) return [];
+  return text.split(/[,;\/]+/).map(s => s.trim()).filter(Boolean).map(s => {
+    const key = SHEET_CATEGORY_ALIASES[s.toLowerCase()];
+    if (!key) SHEET_STATUS.warnings.push(`Unknown category "${s}" (${where})`);
+    return key;
+  }).filter(Boolean);
+}
+/* "2027-Q1", "Q1 2027", "2027 Q1" -> "2027-Q1" */
+function sheetQuarter(text){
+  const s = String(text || '').toUpperCase();
+  const y = s.match(/(20\d\d)/), q = s.match(/Q\s*([1-4])/);
+  return (y && q) ? y[1] + '-Q' + q[1] : null;
+}
+
+function mergeCardsSheet(rows){
+  const cols = { annualFee: 'annual fee ($)', travelDirect: 'travel (booked direct)' };
+  let updated = 0, added = 0;
+  rows.forEach((r, idx) => {
+    const id = (r['card id'] || '').trim();
+    if (!id) return;
+    let card = byId(id);
+    if (!card){
+      if (!r['card name']){ SHEET_STATUS.warnings.push(`Cards row ${idx + 2}: new card "${id}" needs a Card Name`); return; }
+      card = { id, name: r['card name'], issuer: r['issuer'] || 'Other', annualFee: 0, currency: 'Cash back',
+               categories: Object.fromEntries(CATEGORY_META.map(c => [c.key, c.key === 'rent' ? 0 : 1])), notes: '' };
+      CARDS.push(card); added++;
+    } else updated++;
+    if (r['card name']) card.name = r['card name'];
+    if (r['issuer']) card.issuer = r['issuer'];
+    const fee = sheetNum(r[cols.annualFee]); if (fee != null) card.annualFee = fee;
+    if (r['currency']) card.currency = r['currency'];
+    if (r['notes']) card.notes = r['notes'];
+    CATEGORY_META.forEach(c => {
+      const v = sheetNum(r[c.label.toLowerCase()]);
+      if (v != null) card.categories[c.key] = v;
+    });
+    const direct = sheetNum(r[cols.travelDirect]);
+    if (direct != null) card.travelDirectMult = direct;
+  });
+  return { updated, added };
+}
+
+function mergeRotatingSheet(rows){
+  const byCard = {};
+  rows.forEach((r, idx) => {
+    const id = (r['card id'] || '').trim();
+    if (!id) return;
+    const card = byId(id);
+    if (!card){ SHEET_STATUS.warnings.push(`Rotating row ${idx + 2}: no card with ID "${id}"`); return; }
+    const qk = sheetQuarter(r['quarter']);
+    if (!qk){ SHEET_STATUS.warnings.push(`Rotating row ${idx + 2}: can't read quarter "${r['quarter']}" (use e.g. 2027-Q1)`); return; }
+    (byCard[id] = byCard[id] || []).push({ r, qk, row: idx + 2 });
+  });
+  Object.entries(byCard).forEach(([id, list]) => {
+    const card = byId(id);
+    const old = card.rotatingCategories || {};
+    const rc = { rate: old.rate ?? 5, cap: old.cap ?? 1500, period: 'quarter',
+                 activationRequired: old.activationRequired ?? true, retroactive: old.retroactive ?? true,
+                 calendar: {}, portalCalendar: {}, extraNotes: {} };
+    list.forEach(({ r, qk, row }) => {
+      rc.calendar[qk] = sheetCategoryList(r['bonus categories'], 'Rotating row ' + row);
+      const portal = sheetCategoryList(r['portal-only categories'], 'Rotating row ' + row);
+      if (portal.length) rc.portalCalendar[qk] = portal;
+      if (r['note']) rc.extraNotes[qk] = r['note'];
+      const rate = sheetNum(r['bonus rate (x)']), cap = sheetNum(r['quarterly cap ($)']);
+      if (qk === realQuarterKeyNow() || !rc._pinned){
+        if (rate != null) rc.rate = rate;
+        if (cap != null) rc.cap = cap;
+        if (qk === realQuarterKeyNow()) rc._pinned = true;
+      }
+    });
+    delete rc._pinned;
+    card.rotatingCategories = rc;
+  });
+  return Object.keys(byCard).length;
+}
+
+async function fetchSheetCSV(url){
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 6000);
+  try {
+    const res = await fetch(url + (url.includes('?') ? '&' : '?') + '_=' + Date.now(), { signal: ctrl.signal, cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (/^\s*</.test(text)) throw new Error('link returned a web page, not CSV -- publish the tab as "Comma-separated values"');
+    return parseCSV(text);
+  } finally { clearTimeout(t); }
+}
+
+async function loadSheetData(){
+  const jobs = [];
+  if (SHEET_CARDS_CSV_URL) jobs.push(fetchSheetCSV(SHEET_CARDS_CSV_URL).then(rows => { const r = mergeCardsSheet(rows); SHEET_STATUS.cards = r; }));
+  if (!jobs.length && !SHEET_ROTATING_CSV_URL) return;
+  try { await Promise.all(jobs); } catch (e) { SHEET_STATUS.warnings.push('Cards tab: ' + e.message); }
+  if (SHEET_ROTATING_CSV_URL){
+    try { SHEET_STATUS.rotating = mergeRotatingSheet(await fetchSheetCSV(SHEET_ROTATING_CSV_URL)); }
+    catch (e) { SHEET_STATUS.warnings.push('Rotating tab: ' + e.message); }
+  }
+  if (SHEET_STATUS.cards || SHEET_STATUS.rotating != null) SHEET_STATUS.source = 'sheet';
+  SHEET_STATUS.loadedAt = new Date();
+}
+
+function renderSheetStatus(){
+  const el = document.getElementById('sheet-status');
+  if (!el) return;
+  const wheelSub = document.getElementById('wheel-card-count');
+  if (wheelSub) wheelSub.textContent = CARDS.length;
+  let msg;
+  if (SHEET_STATUS.source === 'sheet'){
+    const parts = [];
+    if (SHEET_STATUS.cards) parts.push(`${SHEET_STATUS.cards.updated} cards${SHEET_STATUS.cards.added ? ` + ${SHEET_STATUS.cards.added} new` : ''}`);
+    if (SHEET_STATUS.rotating != null) parts.push(`rotating calendars for ${SHEET_STATUS.rotating} card${SHEET_STATUS.rotating === 1 ? '' : 's'}`);
+    msg = `Card data loaded live from your Google Sheet (${parts.join(', ')}).`;
+  } else if (SHEET_CARDS_CSV_URL || SHEET_ROTATING_CSV_URL){
+    msg = `Couldn't reach your Google Sheet, so this page is using its built-in card data.`;
+  } else {
+    msg = `Using the card data built into this page.`;
+  }
+  if (SHEET_STATUS.warnings.length){
+    msg += ` Check your sheet: ${SHEET_STATUS.warnings.slice(0, 5).join('; ')}${SHEET_STATUS.warnings.length > 5 ? '…' : ''}.`;
+    console.warn('Sheet warnings:', SHEET_STATUS.warnings);
+  }
+  el.textContent = msg;
+}
+
 function init(){
   populateBaseCatSelect();
   populateIssuerFilter();
@@ -8833,7 +9016,7 @@ function init(){
   renderPreferencesTab();
   renderTimelineTab();
 }
-init();
+loadSheetData().catch(e => { SHEET_STATUS.warnings.push(e.message); }).finally(() => { init(); renderSheetStatus(); });
 </script>
 
 </body></html>
