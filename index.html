@@ -395,6 +395,116 @@
   .spend-tip-k{ font-size:.74rem; font-weight:800; letter-spacing:.02em; color:var(--accent); margin-bottom:3px; }
   .spend-tip p{ font-size:.78rem; line-height:1.45; color:var(--text-dim); margin:0; }
   .spend-tip b{ color:var(--text); }
+
+  /* ---- Playground: compare cards side by side ---- */
+  .cmp-section{ padding:20px 22px; margin-top:20px; margin-bottom:8px; }
+  .cmp-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .cmp-head h3{ margin:2px 0 4px; }
+  .cmp-head p{ font-size:.82rem; color:var(--text-dim); max-width:62ch; line-height:1.5; margin:0; }
+  .cmp-add{ position:relative; margin:14px 0 14px; max-width:520px; }
+  .cmp-add input{ width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:.86rem; }
+  .cmp-add input:disabled{ opacity:.55; cursor:not-allowed; }
+  .cmp-results{ position:absolute; left:0; right:0; top:calc(100% + 6px); z-index:25; background:var(--surface); border:1px solid var(--border-strong); border-radius:12px; box-shadow:0 12px 32px rgba(15,20,25,.16); max-height:300px; overflow:auto; }
+  .cmp-results[hidden]{ display:none; }
+  .cmp-result{ display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; text-align:left; background:none; border:none; padding:9px 13px; cursor:pointer; font:inherit; color:var(--text); border-bottom:1px solid var(--border); }
+  .cmp-result:last-child{ border-bottom:none; }
+  .cmp-result:hover, .cmp-result:focus{ background:var(--surface-2); outline:none; }
+  .cmp-result .nm{ font-weight:700; font-size:.85rem; }
+  .cmp-result .is{ font-size:.74rem; color:var(--text-faint); margin-left:6px; font-weight:500; }
+  .cmp-result .fee{ font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--text-dim); white-space:nowrap; }
+  .cmp-empty{ padding:22px 16px; border:1px dashed var(--border-strong); border-radius:12px; text-align:center; color:var(--text-faint); font-size:.86rem; }
+  .cmp-scroll{ overflow-x:auto; border:1px solid var(--border); border-radius:12px; }
+  .cmp-table{ border-collapse:separate; border-spacing:0; width:100%; min-width:560px; table-layout:fixed; font-size:.82rem; }
+  .cmp-table th, .cmp-table td{ padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:top; text-align:left; background:var(--surface); }
+  .cmp-table tr:last-child > *{ border-bottom:none; }
+  .cmp-table .cmp-label{ width:150px; position:sticky; left:0; z-index:2; font-weight:600; color:var(--text-dim); background:var(--surface-2); border-right:1px solid var(--border); }
+  .cmp-table .cmp-card-head{ vertical-align:top; padding:14px 12px; }
+  .cmp-card-head{ position:relative; text-align:center !important; }
+  .cmp-card-head .cmp-face{ width:min(200px,100%); aspect-ratio:1.586/1; margin:4px auto 12px; border-radius:12px; padding:11px 13px; display:flex; flex-direction:column; justify-content:space-between; text-align:left; box-shadow:0 10px 22px -10px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -14px 20px -14px rgba(0,0,0,.32); position:relative; overflow:hidden; }
+  .cmp-face::before{ content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 22%, rgba(255,255,255,0) 56%, rgba(255,255,255,.10) 68%, rgba(255,255,255,0) 82%); }
+  .cmp-face > *{ position:relative; }
+  .cmp-face-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+  .cmp-face-chip{ width:26px; height:19px; border-radius:4px; background:linear-gradient(135deg,#d9f5e2 0%,#8fd6a8 35%,#4fb27a 60%,#2a7a4f 100%); box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 1px 2px rgba(0,0,0,.35); }
+  .cmp-face-iss{ font-size:.58rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; opacity:.8; text-align:right; }
+  .cmp-face-name{ font-family:"Unbounded",sans-serif; font-weight:700; font-size:.78rem; line-height:1.18; }
+  .cmp-card-head .cmp-title{ font-weight:800; font-size:.98rem; line-height:1.25; }
+  .cmp-card-head .cmp-sub{ font-size:.76rem; color:var(--text-faint); font-weight:600; margin-top:2px; }
+  .cmp-card-head .acts{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center; justify-content:center; }
+  .cmp-card-head .cmp-x{ position:absolute; top:6px; right:8px; background:none; border:none; color:var(--text-faint); cursor:pointer; font-size:1.2rem; line-height:1; padding:2px 4px; z-index:3; }
+  .cmp-card-head .cmp-x:hover{ color:var(--danger); }
+  /* solid dark divider between each card's column */
+  .cmp-table tr:not(.cmp-section-row) > :nth-child(n+2){ border-left:2px solid var(--text); }
+  .cmp-table .cmp-label{ border-right:none; }
+  .cmp-section-row th{ background:var(--surface-2); font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text-faint); font-weight:800; padding:7px 12px; position:static; }
+  .cmp-table td.num{ font-family:"IBM Plex Mono",monospace; font-weight:700; }
+  .cmp-table td.best{ background:color-mix(in oklab, var(--success) 11%, var(--surface)); color:var(--success); }
+  .cmp-table td.dim{ color:var(--text-faint); font-weight:500; }
+  .cmp-table td.good{ color:var(--success); }
+  .cmp-table td.bad{ color:var(--danger); }
+  .cmp-table td .sub{ display:block; font-weight:500; font-size:.7rem; color:var(--text-faint); margin-top:2px; font-family:inherit; }
+  .cmp-table td.total-row{ font-weight:800; }
+  .cmp-yes{ color:var(--success); font-weight:800; }
+  .cmp-no{ color:var(--text-faint); }
+  .cmp-credit{ display:flex; justify-content:space-between; gap:8px; padding:2px 0; line-height:1.35; }
+  .cmp-credit span:last-child{ font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--text-dim); white-space:nowrap; }
+  .cmp-bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:5px; }
+  .cmp-bullets li{ position:relative; padding-left:15px; font-size:.76rem; line-height:1.4; color:var(--text-dim); }
+  .cmp-bullets li::before{ content:"\2022"; position:absolute; left:3px; color:var(--text-faint); }
+  .cmp-note{ font-size:.74rem; color:var(--text-faint); line-height:1.45; font-weight:500; }
+  .cmp-combos-head{ margin-top:28px; }
+
+  /* ---- Preferences: grouped sections, calmer layout ---- */
+  .pref-nav{ display:flex; gap:6px; flex-wrap:wrap; margin:6px 0 18px; padding:4px; background:var(--surface-2); border:1px solid var(--border); border-radius:999px; width:fit-content; max-width:100%; }
+  .pref-nav-btn{ border:none; background:transparent; color:var(--text-dim); font:700 .82rem "Manrope",sans-serif; padding:8px 16px; border-radius:999px; cursor:pointer; white-space:nowrap; }
+  .pref-nav-btn:hover{ color:var(--text); }
+  .pref-nav-btn.active{ background:var(--accent); color:var(--accent-ink); }
+  .pref-group[hidden]{ display:none; }
+  #tab-preferences .pref-panel{ padding:20px 24px; margin-bottom:16px; }
+  #tab-preferences .pref-panel h4{ font-size:1rem; margin:0 0 14px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  #tab-preferences .pref-grid{ grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px 20px; }
+  #tab-preferences .pref-field{ max-width:none; }
+  #tab-preferences .pref-field > span:first-child{ font-size:.78rem; font-weight:700; color:var(--text); }
+  #tab-preferences .pref-field select, #tab-preferences .pref-field input[type="text"], #tab-preferences .pref-field input[type="number"]{ width:100%; }
+  #tab-preferences .pref-checkbox-grid{ grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:8px; }
+  #tab-preferences .pref-checkbox-grid .chk{ padding:9px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface-2); }
+  #tab-preferences .pref-checkbox-grid .chk:hover{ border-color:var(--accent); }
+  #tab-preferences .pref-note{ margin-top:8px; }
+  .pref-more{ margin-top:12px; border:1px solid var(--border); border-radius:10px; background:var(--surface-2); }
+  .pref-more > summary{ cursor:pointer; list-style:none; padding:8px 12px; font-size:.78rem; font-weight:700; color:var(--text-dim); display:flex; align-items:center; gap:6px; }
+  .pref-more > summary::-webkit-details-marker{ display:none; }
+  .pref-more > summary::before{ content:"\25B8"; color:var(--text-faint); transition:transform .15s; }
+  .pref-more[open] > summary::before{ transform:rotate(90deg); }
+  .pref-more > p{ margin:0; padding:0 14px 12px; }
+  .pref-sub{ font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; font-weight:800; color:var(--accent); margin:22px 0 10px; padding-top:16px; border-top:1px solid var(--border); }
+  #tab-preferences h4 + .pref-sub{ margin-top:0; padding-top:0; border-top:none; }
+  .pref-sub small{ display:block; text-transform:none; letter-spacing:0; font-weight:500; font-size:.78rem; color:var(--text-faint); margin-top:3px; }
+  .cmp-details > summary{ cursor:pointer; font-size:.76rem; font-weight:700; color:var(--accent); list-style:none; }
+  .cmp-details > summary::-webkit-details-marker{ display:none; }
+  .cmp-details[open] > summary{ margin-bottom:6px; }
+
+  /* Scroller: compact detail panel + search */
+  .wheel-search{ max-width:520px; margin:0 0 12px; position:relative; z-index:60; }
+  #wheel-detail.wheel-detail{ padding:12px 16px; gap:7px; min-height:0; }
+  #wheel-detail .card-monogram{ width:34px; height:34px; font-size:.72rem; border-radius:9px; }
+  #wheel-detail .card-title .name{ font-size:.95rem; }
+  #wheel-detail .card-title .issuer{ font-size:.74rem; }
+  #wheel-detail .pill, #wheel-detail .approx-badge{ font-size:.7rem; padding:3px 9px; }
+  #wheel-detail .mult-chip{ transform:scale(.88); transform-origin:left center; margin-right:-6px; }
+  #wheel-detail .wheel-detail-benefits-label{ margin-bottom:3px; font-size:.64rem; }
+  #wheel-detail .credit-list{ margin-top:0; display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:2px 24px; }
+  #wheel-detail .credit-row{ font-size:.74rem; }
+  #wheel-detail .card-note{ font-size:.72rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer; }
+  #wheel-detail .card-note.open{ -webkit-line-clamp:unset; display:block; }
+  #wheel-detail .wheel-detail-top{ margin-top:auto; }
+  #wheel-detail .card-actions{ display:flex; justify-content:space-between; gap:10px; margin-top:auto; padding-top:10px; }
+  #wheel-detail .card-actions .btn{ flex:0 0 auto; padding:10px 22px; font-size:.84rem; border-radius:6px; }
+  #wheel-detail .card-actions .btn:nth-child(2){ margin:0 auto; }
+
+  /* Playground: hide the spending rules panel here; scroller and card info side by side */
+  #tab-playground .spend-tips{ display:none; }
+  .wheel-body{ display:grid; grid-template-columns:minmax(260px, 340px) minmax(0,1fr); gap:16px; align-items:stretch; }
+  .wheel-body .wheel-detail{ margin-top:0; align-self:stretch; justify-content:flex-start; }
+  @media (max-width:820px){ .wheel-body{ grid-template-columns:1fr; } }
   .hist-tag{ display:inline-block; margin-left:8px; font-size:.68rem; font-weight:700; color:var(--accent-2); background:var(--accent-2-soft); border-radius:6px; padding:1px 7px; }
   .hist-date{ background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:5px 8px; font:600 .8rem "IBM Plex Mono",monospace; color:var(--text); }
   .hist-date.needs{ border-color:var(--accent); background:var(--accent-soft); }
@@ -851,9 +961,17 @@
   <section class="tab-panel" id="tab-preferences">
     <div class="section-head">
       <h3>Preferences</h3>
-      <p>Tell it how you travel and what you value. Fee limits, credit score, home airline/hotel and your habits change the real dollar numbers; everything else (lounges, protections, co-brand cards&hellip;) can be marked <b>Must have</b> (weighs ~6&times; and puts a matching card in your lineup) or <b>Nice to have</b> (a small nudge). Each extra box you fill in adds a little more weight. All optional.</p>
+      <p>Everything here is optional. Fill in what matters to you and your lineup adjusts.</p>
+      <details class="pref-more" style="margin-top:8px;"><summary>How &ldquo;Must have&rdquo; and &ldquo;Nice to have&rdquo; work</summary><p class="pref-note">Fee limits, credit score, home airline/hotel and your habits change the real dollar numbers; everything else (lounges, protections, co-brand cards&hellip;) can be marked <b>Must have</b> (weighs ~6&times; and puts a matching card in your lineup) or <b>Nice to have</b> (a small nudge). Each extra box you fill in adds a little more weight. All optional.</p></details>
     </div>
 
+    <nav class="pref-nav" id="pref-nav" aria-label="Preference sections">
+      <button type="button" class="pref-nav-btn active" data-pref-nav="basics">Basics</button>
+      <button type="button" class="pref-nav-btn" data-pref-nav="travel">Travel</button>
+      <button type="button" class="pref-nav-btn" data-pref-nav="perks">Perks &amp; protections</button>
+      <button type="button" class="pref-nav-btn" data-pref-nav="tuning">Fine-tuning</button>
+    </nav>
+    <div class="pref-group" data-pref-group="basics">
     <div class="panel pref-panel">
       <h4>Rewards &amp; fees</h4>
       <div class="pref-grid">
@@ -899,9 +1017,11 @@
         <input type="checkbox" id="pref-owns-business" /> I own a business and want business cards considered
       </label>
       <p class="pref-note" style="margin-top:6px;">Left unchecked, business cards (Ink, Spark, Amex Business&hellip;) are never recommended. Ones already in your wallet stay.</p>
-      <p class="pref-note">Every card has a researched minimum credit tier. Cards above your stated tier are left out of <b>Your ideal lineup</b> (never cards already in your wallet). It&rsquo;s a guide, not an approval promise. Spending caps (e.g. Blue Cash Preferred&rsquo;s 6% groceries up to $6,000/yr, then 1%) are modeled where documented.</p>
+      <details class="pref-more"><summary>How your credit score is used</summary><p class="pref-note">Every card has a researched minimum credit tier. Cards above your stated tier are left out of <b>Your ideal lineup</b> (never cards already in your wallet). It&rsquo;s a guide, not an approval promise. Spending caps (e.g. Blue Cash Preferred&rsquo;s 6% groceries up to $6,000/yr, then 1%) are modeled where documented.</p></details>
     </div>
 
+    </div>
+    <div class="pref-group" data-pref-group="travel" hidden>
     <div class="panel pref-panel">
       <h4>How you travel</h4>
       <div class="pref-grid">
@@ -953,7 +1073,7 @@
           <select id="home-hub-select" aria-label="Home airline hub"></select>
         </label>
       </div>
-      <p class="pref-note">Portal-only travel rates (Chase, Amex, Citi, Capital One Travel) apply only if you book through the card&rsquo;s portal; booking direct earns the lower rate. Your home hub&rsquo;s miles are valued a bit higher, other airlines&rsquo; a bit lower, and all airline miles drop further if you never fly.</p>
+      <details class="pref-more"><summary>How booking style &amp; your hub change values</summary><p class="pref-note">Portal-only travel rates (Chase, Amex, Citi, Capital One Travel) apply only if you book through the card&rsquo;s portal; booking direct earns the lower rate. Your home hub&rsquo;s miles are valued a bit higher, other airlines&rsquo; a bit lower, and all airline miles drop further if you never fly.</p></details>
       <label class="chk pref-checkbox" style="margin-top:4px;">
         <input type="checkbox" id="pref-hub-locked" /> I'm committed to this hub/airline &mdash; don't suggest switching for optimization
       </label>
@@ -996,6 +1116,8 @@
       </div>
     </div>
 
+    </div>
+    <div class="pref-group" data-pref-group="perks" hidden>
     <div class="panel pref-panel">
       <h4>Lounge access</h4>
       <p class="pref-note" style="margin-top:0;">A must forces a lounge card into <b>Your ideal lineup</b>; nice to have is a small plus. Lounge cards can still surface for their dollar value.</p>
@@ -1019,8 +1141,17 @@
     </div>
 
     <div class="panel pref-panel">
+      <h4>Misc</h4>
+      <label class="chk pref-checkbox">
+        <input type="checkbox" id="pref-global-entry" /> I want a card that credits Global Entry/TSA PreCheck <span class="lvl-slot" data-lvl-slot="globalEntry"></span>
+      </label>
+    </div>
+    </div>
+    <div class="pref-group" data-pref-group="tuning" hidden>
+    <div class="panel pref-panel">
       <h4>Optimizer weighting</h4>
-      <p class="pref-note" style="margin-top:0;">These answers change the real dollar numbers in <b>Your ideal lineup</b> and <b>Net value</b>. Each credit is counted by how likely you are to use it (a $200 airline credit is worth less if you fly twice a year); lounges, insurance and similar perks get a labeled <i>estimate</i>. Blank = $0.</p>
+      <details class="pref-more"><summary>How these answers are used</summary><p class="pref-note">These answers change the real dollar numbers in <b>Your ideal lineup</b> and <b>Net value</b>. Each credit is counted by how likely you are to use it (a $200 airline credit is worth less if you fly twice a year); lounges, insurance and similar perks get a labeled <i>estimate</i>. Blank = $0.</p></details>
+      <div class="pref-sub">Your travel habits</div>
       <div class="pref-grid">
         <label class="pref-field">
           <span>Flights per year</span>
@@ -1059,7 +1190,7 @@
         </div>
       </div>
 
-      <p class="pref-note">Already have these? A perk that just duplicates coverage you're already paying for elsewhere is worth $0, so tell it what to skip:</p>
+      <div class="pref-sub">Coverage you already have<small>Duplicate perks are worth $0, so we skip them.</small></div>
       <div class="pref-checkbox-grid">
         <label class="chk"><input type="checkbox" data-already="globalEntry" /> Global Entry/TSA PreCheck, current and not expiring soon</label>
         <label class="chk"><input type="checkbox" data-already="phoneInsurance" /> Cell phone insurance (carrier plan or AppleCare)</label>
@@ -1067,7 +1198,7 @@
         <label class="chk"><input type="checkbox" data-already="travelInsurance" /> Standalone travel insurance for trip cancellation/interruption</label>
       </div>
 
-      <p class="pref-note">Already paying monthly for these? A streaming/rideshare/delivery/fitness credit is only worth something if you already spend there:</p>
+      <div class="pref-sub">Subscriptions you already pay for<small>Matching credits only count if you already spend there.</small></div>
       <div class="pref-checkbox-grid">
         <label class="chk"><input type="checkbox" data-subscription="streaming" /> Streaming services (Netflix, Disney+, Apple TV+, etc.)</label>
         <label class="chk"><input type="checkbox" data-subscription="rideshare" /> Uber/Lyft rides regularly</label>
@@ -1075,7 +1206,8 @@
         <label class="chk"><input type="checkbox" data-subscription="fitness" /> A gym/fitness membership (Equinox, Oura, etc.)</label>
       </div>
 
-      <div class="pref-grid" style="margin-top:14px;">
+      <div class="pref-sub">Credits &amp; fees</div>
+      <div class="pref-grid">
         <label class="pref-field">
           <span>How reliably do you use recurring credits?</span>
           <select id="pref-credit-discipline">
@@ -1096,14 +1228,15 @@
         </label>
       </div>
 
-      <div class="pref-field" style="max-width:none; margin-top:14px;">
+      <div class="pref-sub">Effort</div>
+      <div class="pref-field" style="max-width:none;">
         <span>How much do you want to actively manage?</span>
         <div class="period-toggle three-way" id="pref-simplicity-toggle" role="group" aria-label="How much do you want to actively manage">
           <button type="button" class="period-toggle-btn" data-simplicity="simple">Keep it simple</button>
           <button type="button" class="period-toggle-btn" data-simplicity="balanced">Balanced</button>
           <button type="button" class="period-toggle-btn" data-simplicity="optimize">I'll optimize</button>
         </div>
-        <p class="pref-note" style="margin-top:8px;">&ldquo;Keep it simple&rdquo; caps <b>Your ideal lineup</b> at 2 cards unless you set &ldquo;Max cards&rdquo; in Rewards &amp; fees above. This is also the one setting that leaves rotating-bonus cards (Freedom Flex, Discover it) out; otherwise they&rsquo;re always included.</p>
+        <details class="pref-more"><summary>What each setting does</summary><p class="pref-note">&ldquo;Keep it simple&rdquo; caps <b>Your ideal lineup</b> at 2 cards unless you set &ldquo;Max cards&rdquo; in Rewards &amp; fees above. This is also the one setting that leaves rotating-bonus cards (Freedom Flex, Discover it) out; otherwise they&rsquo;re always included.</p></details>
       </div>
     </div>
 
@@ -1122,11 +1255,6 @@
       </label>
     </div>
 
-    <div class="panel pref-panel">
-      <h4>Misc</h4>
-      <label class="chk pref-checkbox">
-        <input type="checkbox" id="pref-global-entry" /> I want a card that credits Global Entry/TSA PreCheck <span class="lvl-slot" data-lvl-slot="globalEntry"></span>
-      </label>
     </div>
   </section>
 
@@ -1307,6 +1435,11 @@
           <button class="btn btn-primary btn-sm" id="wheel-spin-btn"><span class="ic">🎲</span> Surprise me</button>
         </div>
       </div>
+      <div class="cmp-add wheel-search">
+        <input type="search" id="wheel-search" placeholder="Search the scroller for a card&hellip;" autocomplete="off" aria-label="Search the scroller for a card" />
+        <div class="cmp-results" id="wheel-results" hidden></div>
+      </div>
+      <div class="wheel-body">
       <div class="wheel-track-wrap">
         <button class="wheel-nav wheel-nav-top" id="wheel-prev" aria-label="Previous card" type="button">&#9650;</button>
         <div class="wheel-stage" id="wheel-stage">
@@ -1319,9 +1452,30 @@
         <div class="wheel-fade wheel-fade-bottom"></div>
       </div>
       <div class="wheel-detail" id="wheel-detail"></div>
+      </div>
     </section>
 
-    <div class="spend-panel-slot" id="spend-panel-slot-playground"></div>
+    <section class="panel cmp-section" id="compare-section">
+      <div class="cmp-head">
+        <div>
+          <div class="eyebrow">Compare</div>
+          <h3>Compare cards side by side</h3>
+          <p>Add up to 4 cards, one at a time, and see everything about them in one table: multipliers, fees, credits, perks and what each would earn on your spending.</p>
+        </div>
+        <span class="pg-counter"><b id="cmp-count">0</b> / 4 cards</span>
+      </div>
+      <div class="cmp-add">
+        <input type="search" id="cmp-search" placeholder="Search for a card to add&hellip;" autocomplete="off" aria-label="Search for a card to compare" />
+        <div class="cmp-results" id="cmp-results" hidden></div>
+      </div>
+      <div class="cmp-scroll" id="cmp-table"></div>
+    </section>
+
+    <div class="section-head cmp-combos-head">
+      <h3>Build &amp; save combos</h3>
+      <p>Pick any set of cards and see how they work together on your spending.</p>
+    </div>
+
     <div class="pg-layout">
       <div class="panel" style="padding:18px 20px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
@@ -5889,6 +6043,7 @@ const state = {
   wallet: [],     // card ids
   assignment: {}, // category(or custom id) -> card id -- what you've actually assigned; never auto-optimized (see ensureAssignmentDefaults)
   pgSelected: [], // card ids, up to 20
+  compareIds: [], // card ids shown side by side in Playground > Compare cards, up to 4
   combos: [],     // { id, name, cardIds, colorIdx }
   creditChecked: {},  // cardId -> { creditId: bool } -- predefined credits, opt-in
   customCredits: {},  // cardId -> [{ id, label, value }] -- user-added, checked by default
@@ -6540,6 +6695,7 @@ function onSpendChanged(){
   document.getElementById('spend-total-val').textContent = fmt$(totalSpend()) + '/mo';
   renderWalletTab();
   renderPlaygroundLive();
+  renderCompare();
   renderComboList();
 }
 
@@ -7912,7 +8068,161 @@ document.getElementById('timeline-regenerate-btn').addEventListener('click', () 
 /* ============================================================
    RENDER: PLAYGROUND
    ============================================================ */
+
+/* ============================================================
+   PLAYGROUND: COMPARE CARDS -- up to 4 cards in a side-by-side table: fees, point value, every
+   category multiplier, what each would earn on YOUR spending (as if it handled everything),
+   researched credits, perk/protection checks and the full benefits list. The best figure in
+   each comparable row is highlighted. Display only: nothing here feeds the optimizer.
+   ============================================================ */
+const CMP_MAX = 4;
+function compareToggle(id){
+  if (state.compareIds.includes(id)) state.compareIds = state.compareIds.filter(x => x !== id);
+  else if (state.compareIds.length < CMP_MAX) state.compareIds.push(id);
+  renderCompare();
+  renderWheelDetail();
+}
+function cmpAloneAnnual(card){
+  return spendLines().reduce((sum, line) => sum + lineValue(card, line, undefined, [card.id]), 0) * 12;
+}
+function renderCompareResults(){
+  const box = document.getElementById('cmp-results');
+  const input = document.getElementById('cmp-search');
+  if (!box || !input) return;
+  const q = input.value.trim().toLowerCase();
+  const full = state.compareIds.length >= CMP_MAX;
+  if (full || document.activeElement !== input && !q){ box.hidden = true; return; }
+  const list = CARDS.filter(c => !state.compareIds.includes(c.id) &&
+    (!q || c.name.toLowerCase().includes(q) || c.issuer.toLowerCase().includes(q) || issuerAliasMatch(q, c.issuer.toLowerCase()))).slice(0, 8);
+  box.innerHTML = list.map(c => `<button type="button" class="cmp-result" data-cmp-pick="${c.id}"><span><span class="nm">${c.name}</span><span class="is">${c.issuer}</span></span><span class="fee">${c.annualFee ? fmt$(c.annualFee) + '/yr' : 'No fee'}</span></button>`).join('')
+    || '<div class="cmp-result" style="cursor:default;"><span class="is">No cards match.</span></div>';
+  box.hidden = false;
+}
+function renderCompare(){
+  const table = document.getElementById('cmp-table');
+  if (!table) return;
+  state.compareIds = state.compareIds.filter(id => byId(id));
+  const cards = state.compareIds.map(byId);
+  document.getElementById('cmp-count').textContent = cards.length;
+  const input = document.getElementById('cmp-search');
+  input.disabled = cards.length >= CMP_MAX;
+  input.placeholder = cards.length >= CMP_MAX ? 'Compare is full \u2014 remove a card to add another' : (cards.length ? 'Add another card\u2026' : 'Search for a card to add\u2026');
+  if (!cards.length){
+    table.innerHTML = '<div class="cmp-empty">Search above (or use <b>+ Compare</b> on the scroller) to add your first card.</div>';
+    return;
+  }
+  const spendTotal = totalSpend();
+  const multi = cards.length > 1;
+  const cell = (inner, cls) => `<td${cls ? ` class="${cls}"` : ''}>${inner}</td>`;
+  const labelRow = (label, cellsHTML) => `<tr><th class="cmp-label" scope="row">${label}</th>${cellsHTML}</tr>`;
+  const sectionRow = label => `<tr class="cmp-section-row"><th colspan="${cards.length + 1}">${label}</th></tr>`;
+  // Row of numbers where the best (highest or lowest) gets highlighted.
+  const numRow = (label, vals, fmt, opts = {}) => {
+    const higher = opts.lowerBetter ? false : true;
+    const best = multi ? (higher ? Math.max(...vals) : Math.min(...vals)) : null;
+    const allSame = vals.every(v => v === vals[0]);
+    return labelRow(label, vals.map((v, i) => cell(fmt(v, cards[i]), 'num' + (multi && !allSame && v === best ? ' best' : '') + (opts.cls ? ' ' + opts.cls : ''))).join(''));
+  };
+
+  const head = labelRow('', cards.map(c => { const vis = cardVisualFor(c); return `<th class="cmp-card-head" scope="col">
+      <button class="cmp-x" type="button" data-cmp-remove="${c.id}" aria-label="Remove ${c.name} from comparison">&times;</button>
+      <div class="cmp-face" style="background:${vis.grad}; color:${vis.ink}" aria-hidden="true">
+        <div class="cmp-face-top"><span class="cmp-face-chip"></span><span class="cmp-face-iss">${c.issuer}</span></div>
+        <div class="cmp-face-name">${c.name}</div>
+      </div>
+      <div class="cmp-title">${c.name}</div>
+      <div class="cmp-sub">${c.issuer}${isBusinessCard(c) ? ' &middot; Business' : ''}</div>
+      <div class="acts">
+        <button class="btn btn-sm ${state.wallet.includes(c.id) ? 'btn-primary' : ''}" type="button" data-cmp-wallet="${c.id}">${state.wallet.includes(c.id) ? '&#10003; In wallet' : '+ Wallet'}</button>
+        ${applyLinkHTML(c)}
+      </div></th>`; }).join(''));
+
+  // At a glance
+  const glance = sectionRow('At a glance')
+    + numRow('Annual fee', cards.map(c => c.annualFee), v => v ? fmt$(v) + '/yr' : 'No fee', { lowerBetter: true })
+    + labelRow('Rewards currency', cards.map(c => cell(c.currency + (isApprox(c) ? '<span class="sub">approximate data</span>' : ''))).join(''))
+    + labelRow('Value per point', cards.map(c => {
+        const v = valuationFor(c, [c.id]);
+        return cell(c.currency === 'Cash back' ? '1&cent; (cash back)' : (Math.round(v * 100) / 100) + '&cent; per point', 'num');
+      }).join(''))
+    + labelRow('Credit score needed', cards.map(c => { const t = impliedMinCreditTier(c); return cell(t ? t.charAt(0).toUpperCase() + t.slice(1) : '&mdash;'); }).join(''));
+
+  // Earning rates, every category
+  const mults = cards.map(c => effectiveCategories(c));
+  let rates = sectionRow('Earning rates');
+  CATEGORY_META.forEach(cat => {
+    const vals = cards.map((c, i) => (c.dynamicRent && cat.key === 'rent') ? 1.25 : (mults[i][cat.key] ?? 0));
+    const best = Math.max(...vals), allSame = vals.every(v => v === vals[0]);
+    rates += labelRow(cat.label, cards.map((c, i) => {
+      const rot = rotatingKeysNowFor(c).includes(cat.key) ? '<span class="rot-mark" title="Rotating bonus category this quarter">&#8635;</span>' : '';
+      const txt = (c.dynamicRent && cat.key === 'rent') ? '0.5&ndash;1.25x' : (vals[i] ? vals[i] + 'x' : '&mdash;');
+      return cell(txt + rot, 'num' + (multi && !allSame && vals[i] === best && best > 0 ? ' best' : '') + (!vals[i] ? ' dim' : ''));
+    }).join(''));
+  });
+
+  // On your spending
+  let yours = sectionRow('On your spending');
+  if (spendTotal > 0){
+    const earned = cards.map(cmpAloneAnnual);
+    const perks = cards.map(c => selectedCreditsSum(c.id) + passivePerkValue(c).total);
+    const net = cards.map((c, i) => earned[i] - c.annualFee + perks[i]);
+    yours += numRow('Rewards per year', earned, v => fmt$(v) + '/yr')
+      + labelRow('Annual fee', cards.map(c => cell(c.annualFee ? '&minus;' + fmt$(c.annualFee) + '/yr' : '$0', 'num' + (c.annualFee ? ' bad' : ' dim'))).join(''))
+      + labelRow('Credits &amp; perks you\u2019d use', cards.map((c, i) => cell(perks[i] ? '+' + fmt$(perks[i]) + '/yr' : '$0', 'num' + (perks[i] ? ' good' : ' dim'))).join(''))
+      + numRow('Net value per year', net, v => fmt$Signed(v) + '/yr', { cls: 'total-row' })
+      + `<tr><th class="cmp-label" scope="row"></th><td colspan="${cards.length}"><span class="cmp-note">Each card is shown as if it handled all of your ${fmt$(spendTotal)}/mo spending on its own, using your Preferences for point values and credits. In a real wallet you&rsquo;d split spend across cards.</span></td></tr>`;
+  } else {
+    yours += `<tr><th class="cmp-label" scope="row">Rewards &amp; net value</th><td colspan="${cards.length}"><span class="cmp-note">Enter your monthly spending in the My wallet tab to see what each card would earn you per year, after fees and credits.</span></td></tr>`;
+  }
+
+  // Credits
+  const creditsTotal = cards.map(c => allCreditsFor(c.id).reduce((s, cr) => s + cr.value, 0));
+  const creditsRows = sectionRow('Credits')
+    + labelRow('Statement credits', cards.map(c => {
+        const list = allCreditsFor(c.id);
+        return cell(list.length ? list.map(cr => `<div class="cmp-credit"><span>${cr.label}</span><span>${fmt$(cr.value)}</span></div>`).join('') : '<span class="cmp-no">None researched</span>');
+      }).join(''))
+    + numRow('Total on offer', creditsTotal, v => v ? fmt$(v) + '/yr' : '$0');
+
+  // Perks & protections
+  const check = ok => ok ? '<span class="cmp-yes">&#10003; Yes</span>' : '<span class="cmp-no">&mdash;</span>';
+  let perks = sectionRow('Perks & protections')
+    + labelRow('Lounge access', cards.map(c => cell(check(cardHasLoungeAccess(c)))).join(''))
+    + labelRow('No foreign transaction fee', cards.map(c => cell(check(cardNoForeignTxnFee(c)))).join(''))
+    + labelRow('Global Entry / TSA credit', cards.map(c => cell(check(cardHasGlobalEntryCredit(c)))).join(''));
+  Object.keys(PROTECTION_CHECKS).forEach(k => {
+    perks += labelRow(PROTECTION_CHECKS[k].label, cards.map(c => cell(check(cardMatchesProtection(c, k)))).join(''));
+  });
+  perks += labelRow('All listed benefits', cards.map(c => {
+    const b = benefitsFor(c.id);
+    return cell(b.length ? `<ul class="cmp-bullets">${b.map(x => `<li>${x}</li>`).join('')}</ul>` : '<span class="cmp-no">None researched</span>');
+  }).join(''));
+  perks += labelRow('Notes', cards.map(c => cell(c.notes ? `<details class="cmp-details"><summary>Show notes</summary><span class="cmp-note">${c.notes}</span></details>` : '')).join(''));
+
+  table.innerHTML = `<table class="cmp-table"><thead>${head}</thead><tbody>${glance}${rates}${yours}${creditsRows}${perks}</tbody></table>`;
+  table.querySelectorAll('[data-cmp-remove]').forEach(b => b.addEventListener('click', () => compareToggle(b.dataset.cmpRemove)));
+  table.querySelectorAll('[data-cmp-wallet]').forEach(b => b.addEventListener('click', () => { toggleWalletCard(b.dataset.cmpWallet); renderCompare(); }));
+  renderCompareResults();
+}
+function setupCompare(){
+  const input = document.getElementById('cmp-search');
+  const box = document.getElementById('cmp-results');
+  input.addEventListener('input', renderCompareResults);
+  input.addEventListener('focus', renderCompareResults);
+  box.addEventListener('click', e => {
+    const b = e.target.closest('[data-cmp-pick]');
+    if (!b) return;
+    compareToggle(b.dataset.cmpPick);
+    input.value = '';
+    box.hidden = true;
+    input.blur();
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.cmp-add')) box.hidden = true; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') box.hidden = true; });
+}
+
 function renderPlaygroundPanel(){
+  renderCompare();
   document.getElementById('quick-pg-count').textContent = state.pgSelected.length;
   document.getElementById('pg-selected-count').textContent = state.pgSelected.length;
 
@@ -8540,6 +8850,8 @@ function renderWheelDetail(id){
   const inWallet = state.wallet.includes(card.id);
   const inPg = state.pgSelected.includes(card.id);
   const pgFull = state.pgSelected.length >= 20 && !inPg;
+  const inCmp = state.compareIds.includes(card.id);
+  const cmpFull = state.compareIds.length >= CMP_MAX && !inCmp;
   let chips = multChipsHTML(card, 5);
   panel.innerHTML = `
     <div class="wheel-detail-top">
@@ -8559,8 +8871,11 @@ function renderWheelDetail(id){
     <div class="card-note">${card.notes}</div>
     <div class="card-actions">
       <button class="btn btn-sm ${inWallet ? 'btn-primary' : ''}" data-add-wallet="${card.id}">${inWallet ? '✓ In wallet' : '+ Wallet'}</button>
+      <button class="btn btn-sm ${inCmp ? 'btn-primary' : ''}" data-add-cmp="${card.id}" ${cmpFull ? 'disabled' : ''}>${inCmp ? '✓ Comparing' : '+ Compare'}</button>
       <button class="btn btn-sm ${inPg ? 'btn-primary' : ''}" data-add-pg="${card.id}" ${pgFull ? 'disabled' : ''}>${inPg ? '✓ In playground' : '+ Playground'}</button>
     </div>`;
+  const wn = panel.querySelector('.card-note'); if (wn) wn.addEventListener('click', () => wn.classList.toggle('open'));
+  panel.querySelectorAll('[data-add-cmp]').forEach(btn => btn.addEventListener('click', () => compareToggle(btn.dataset.addCmp)));
   panel.querySelectorAll('[data-add-wallet]').forEach(btn => btn.addEventListener('click', () => toggleWalletCard(btn.dataset.addWallet)));
   panel.querySelectorAll('[data-add-pg]').forEach(btn => btn.addEventListener('click', () => togglePgCard(btn.dataset.addPg)));
 }
@@ -8764,6 +9079,35 @@ function renderWheelSection(){
   }
 }
 
+
+/* Search box above the scroller: type a card name, pick it, and the wheel scrolls to it. */
+function setupWheelSearch(){
+  const input = document.getElementById('wheel-search');
+  const box = document.getElementById('wheel-results');
+  if (!input || !box) return;
+  const render = () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q && document.activeElement !== input){ box.hidden = true; return; }
+    const list = CARDS.filter(c => !q || c.name.toLowerCase().includes(q) || c.issuer.toLowerCase().includes(q) || issuerAliasMatch(q, c.issuer.toLowerCase())).slice(0, 8);
+    box.innerHTML = list.map(c => `<button type="button" class="cmp-result" data-wheel-pick="${c.id}"><span><span class="nm">${c.name}</span><span class="is">${c.issuer}</span></span><span class="fee">${c.annualFee ? fmt$(c.annualFee) + '/yr' : 'No fee'}</span></button>`).join('')
+      || '<div class="cmp-result" style="cursor:default;"><span class="is">No cards match.</span></div>';
+    box.hidden = false;
+  };
+  input.addEventListener('input', render);
+  input.addEventListener('focus', render);
+  box.addEventListener('click', e => {
+    const b = e.target.closest('[data-wheel-pick]');
+    if (!b || !wheelOrder) return;
+    const idx = wheelOrder.indexOf(b.dataset.wheelPick);
+    if (idx >= 0){ WheelAudio.ensure(); wheelGoToIndex(idx, 600); }
+    input.value = '';
+    box.hidden = true;
+    input.blur();
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.wheel-search')) box.hidden = true; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') box.hidden = true; });
+}
+
 document.getElementById('wheel-spin-btn').addEventListener('click', () => {
   if (!wheelCardEls.length) return;
   WheelAudio.ensure();
@@ -8799,7 +9143,7 @@ document.getElementById('wheel-sound-toggle').addEventListener('click', () => {
 /* ============================================================
    TABS
    ============================================================ */
-const SPEND_PANEL_SLOTS = { wallet: 'spend-panel-slot-wallet', playground: 'spend-panel-slot-playground' };
+const SPEND_PANEL_SLOTS = { wallet: 'spend-panel-slot-wallet' };
 function relocateSpendPanel(tabName){
   const spendPanel = document.getElementById('spend-panel');
   const slotId = SPEND_PANEL_SLOTS[tabName];
@@ -8818,6 +9162,7 @@ function selectTab(tabName){
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabName));
   relocateSpendPanel(tabName);
   if (tabName === 'fees') renderFeesTab();
+  if (tabName === 'playground') renderCompare();
   if (tabName === 'preferences') renderPreferencesTab();
   if (tabName === 'timeline') renderTimelineTab();
 }
@@ -8904,7 +9249,7 @@ function renderLevelSelects(){
     });
   });
 }
-const prefsChanged = () => { renderLibrary(); renderWalletTab(); };
+const prefsChanged = () => { renderLibrary(); renderWalletTab(); renderCompare(); };
 let prefsChangedTimer = null;
 const prefsChangedSoon = () => { clearTimeout(prefsChangedTimer); prefsChangedTimer = setTimeout(prefsChanged, 250); };
 
@@ -9240,6 +9585,8 @@ function init(){
   renderLibrary();
   renderWalletTab();
   renderPlaygroundPanel();
+  setupCompare();
+  setupWheelSearch();
   renderComboList();
   renderFeesTab();
   renderPreferencesTab();
@@ -9269,6 +9616,18 @@ const PREF_INFO = {
   'Misc': `<p><b>What this controls:</b> one extra preference.</p>
     <p>Check it to favor cards that credit the Global Entry or TSA PreCheck fee. Mark it <i>Must have</i> to require one in your lineup.</p>`,
 };
+
+function setupPrefNav(){
+  const btns = [...document.querySelectorAll('#pref-nav [data-pref-nav]')];
+  const show = key => {
+    btns.forEach(b => b.classList.toggle('active', b.dataset.prefNav === key));
+    document.querySelectorAll('#tab-preferences .pref-group').forEach(g => { g.hidden = g.dataset.prefGroup !== key; });
+    try { localStorage.setItem('multiplier.prefGroup', key); } catch (e) {}
+  };
+  btns.forEach(b => b.addEventListener('click', () => show(b.dataset.prefNav)));
+  let saved = null; try { saved = localStorage.getItem('multiplier.prefGroup'); } catch (e) {}
+  if (saved && btns.some(b => b.dataset.prefNav === saved)) show(saved);
+}
 function setupInfoButtons(){
   const panels = [...document.querySelectorAll('#tab-preferences .pref-panel')];
   const closeAll = except => panels.forEach(pn => {
@@ -9309,7 +9668,7 @@ function setupInfoButtons(){
    (private windows), so every access is guarded and the page works without it.
    ============================================================ */
 const STORE_KEY = 'multiplier.saved.v1';
-const PERSIST_KEYS = ['spend','customCats','wallet','assignment','pgSelected','combos','creditChecked','customCredits',
+const PERSIST_KEYS = ['spend','customCats','wallet','assignment','pgSelected','compareIds','combos','creditChecked','customCredits',
   'viewMode','periodMode','homeHub','idealMaxCards','appHistory','histDismissed','travelBookingMode','rotatingActivated','prefs'];
 let storageOK = true, saveBlocked = false, lastSavedAt = null, lastSavedJSON = '';
 
@@ -9360,6 +9719,7 @@ function applySaved(data){
   if (Array.isArray(data.customCats)) state.customCats = data.customCats.filter(c => c && c.id && c.label);
   if (Array.isArray(data.wallet)) state.wallet = data.wallet.filter(ok);
   if (Array.isArray(data.pgSelected)) state.pgSelected = data.pgSelected.filter(ok).slice(0, 20);
+  if (Array.isArray(data.compareIds)) state.compareIds = data.compareIds.filter(ok).slice(0, 4);
   if (Array.isArray(data.combos)) state.combos = data.combos.map(c => c && Array.isArray(c.cardIds) ? { ...c, cardIds: c.cardIds.filter(ok) } : null).filter(Boolean);
   if (obj(data.assignment)) state.assignment = Object.fromEntries(Object.entries(data.assignment).filter(([, id]) => ok(id)));
   if (obj(data.creditChecked)) state.creditChecked = data.creditChecked;
@@ -9426,6 +9786,7 @@ function setupSaveUI(){
   updateSaveStatus();
 }
 setupInfoButtons();
+setupPrefNav();
 setupSaveUI();
 loadSheetData().catch(e => { SHEET_STATUS.warnings.push(e.message); }).finally(() => { restoreSavedState(); init(); renderSheetStatus(); });
 </script>
